@@ -49,7 +49,8 @@ public class ESI_Analysis implements PlugIn {
     int	  nrBins=100;		// #bins/states in entropy calculation
     int   esi_order=4;		// ESI order
     boolean doMultiCore=true;	// run multi-threaded 
-    
+    boolean normOutput=true;	// normalize the output images
+
     /** This runs all steps of the analysis, given an ImageStack as input. */
     void runAnalysis( ImageStack stck, float pxMin, float pxMax  ) {
 
@@ -95,7 +96,8 @@ public class ESI_Analysis implements PlugIn {
 	    }
 
 	    gb.blurFloat( reconstruction , 0.8, 0.8, 0.01);
-	    normalize( reconstruction );
+	    if (normOutput)
+		normalize( reconstruction );
 
 	    // add these to the result stacks
 	    rec.addSlice(reconstruction);
@@ -241,6 +243,7 @@ public class ESI_Analysis implements PlugIn {
 	gd.addNumericField("min px value", pxMin, 2); 
 	gd.addNumericField("max px value", pxMax, 2);
 	gd.addCheckbox("Multicore",doMultiCore);
+	gd.addCheckbox("normalize output",normOutput);
 	gd.showDialog();
 	if (gd.wasCanceled()) return;
 
@@ -251,6 +254,7 @@ public class ESI_Analysis implements PlugIn {
 	pxMin	      =   (float)gd.getNextNumber();
 	pxMax	      =   (float)gd.getNextNumber();
 	doMultiCore   =	  gd.getNextBoolean();
+	normOutput    =	  gd.getNextBoolean();
 
 
 	// start the analysis
@@ -272,7 +276,8 @@ public class ESI_Analysis implements PlugIn {
 	FloatProcessor ret =
 	    new FloatProcessor(2*pxl.getWidth(),2*pxl.getHeight());
 	ESI_internal( ret, pxl, order, 0, pxl.getHeight()-1);
-	normalize( ret );
+	if (normOutput)
+	    normalize( ret );
 	return ret;
     }
 
@@ -338,7 +343,8 @@ public class ESI_Analysis implements PlugIn {
 	    }
 	
 	    // normalize result image
-	    ESI_Analysis.normalize(ret);
+	    if (normOutput)
+		ESI_Analysis.normalize(ret);
 
 	    return ret;
 	}
